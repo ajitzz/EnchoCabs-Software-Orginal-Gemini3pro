@@ -1,7 +1,6 @@
 require('dotenv').config();
 const { Pool } = require('pg');
 
-// Prefer DATABASE_URL / POSTGRES_URL
 const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
 
 if (!connectionString) {
@@ -9,17 +8,17 @@ if (!connectionString) {
   process.exit(1);
 }
 
-// Detect if it's Render (remote)
-const isRemote = connectionString.includes('render.com');
+// We know Render uses *.render.com
+const isRender = connectionString.includes('render.com');
 
 const pool = new Pool({
   connectionString,
-  ssl: isRemote ? { rejectUnauthorized: false } : false,
+  ssl: isRender ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle client', err);
-  process.exit(-1);
+  process.exit(1);
 });
 
 pool.connect()
